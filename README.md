@@ -18,41 +18,19 @@ This repository contains a Data Mining mini-project focused on predicting custom
 
 ## Project Flow
 
-The project follows a standard data mining pipeline, visualized below:
+The project follows a standard data mining pipeline, visualized below using a Mermaid diagram:
 
-```
-+---------------------+
-| 1. Raw Data         |
-| (WA_Fn-UseC...)     |
-+---------+-----------+
-          |
-          v
-+---------------------+
-| 2. Data Exploration |
-| (src/data_exploration.py)|
-+---------+-----------+
-          | (Insights)
-          v
-+---------------------+
-| 3. Data Preprocessing|
-| (src/data_preprocessing.py)|
-+---------+-----------+
-          | (Cleaned Data)
-          v
-+---------------------+
-| 4. Model Training   |
-|    & Evaluation     |
-| (src/model_training.py)|
-+---------+-----------+
-          | (Trained Model & Metrics)
-          v
-+---------------------+
-| 5. Streamlit Dashboard|
-|    (src/app.py)     |
-+---------------------+
-  - Data Overviews
-  - Distributions
-  - Model Metrics & CM
+```mermaid
+graph TD
+    A[Raw Data<br>(WA_Fn-UseC...)] --> B{Data Exploration<br>(src/data_exploration.py)}
+    B --> C{Data Preprocessing<br>(src/data_preprocessing.py)}
+    C --> D{Model Training & Eval<br>(src/model_training.py)}
+    D --> E(Interactive Streamlit Dashboard<br>(src/app.py))
+    subgraph Streamlit Features
+        E --> F[Data Overviews]
+        E --> G[Distributions]
+        E --> H[Model Metrics & CM]
+    end
 ```
 
 ## Setup and Running
