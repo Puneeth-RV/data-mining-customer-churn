@@ -4,10 +4,15 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
 import numpy as np
+from pathlib import Path # Import Pathlib
 
 # Load the preprocessed dataset
 try:
-    df = pd.read_csv('../data/processed/telco_churn_preprocessed.csv')
+    # Construct an absolute path relative to the current script's directory
+    current_dir = Path(__file__).parent
+    processed_data_path = current_dir.parent / 'data' / 'processed' / 'telco_churn_preprocessed.csv'
+
+    df = pd.read_csv(processed_data_path)
     print("Preprocessed dataset loaded successfully.")
 
     # Separate features (X) and target (y)
@@ -48,6 +53,6 @@ try:
     print(classification_report(y_test, y_pred))
 
 except FileNotFoundError:
-    print("Error: The preprocessed dataset file was not found. Please ensure 'telco_churn_preprocessed.csv' is in the 'data_mining_project/' directory.")
+    print(f"Error: The preprocessed dataset file was not found. Please ensure '{processed_data_path.name}' is in the '{processed_data_path.parent}' directory.")
 except Exception as e:
     print(f"An error occurred during model training and evaluation: {e}")

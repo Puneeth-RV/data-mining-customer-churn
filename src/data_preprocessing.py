@@ -2,10 +2,16 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from pathlib import Path # Import Pathlib
 
 # Load the dataset
 try:
-    df = pd.read_csv('../data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    # Construct an absolute path relative to the current script's directory
+    current_dir = Path(__file__).parent
+    raw_data_path = current_dir.parent / 'data' / 'raw' / 'WA_Fn-UseC_-Telco-Customer-Churn.csv'
+    processed_data_path = current_dir.parent / 'data' / 'processed' / 'telco_churn_preprocessed.csv'
+
+    df = pd.read_csv(raw_data_path)
     print("Dataset loaded successfully.")
 
     # --- Preprocessing Steps ---
@@ -60,10 +66,10 @@ try:
     print(df.head())
 
     # Save the preprocessed data (optional, but good for next steps)
-    df.to_csv('../data/processed/telco_churn_preprocessed.csv', index=False)
-    print("Preprocessed data saved to '../data/processed/telco_churn_preprocessed.csv'")
+    df.to_csv(processed_data_path, index=False)
+    print(f"Preprocessed data saved to '{processed_data_path}'")
 
 except FileNotFoundError:
-    print("Error: The dataset file was not found. Please ensure 'WA_Fn-UseC_-Telco-Customer-Churn.csv' is in the 'data_mining_project/' directory.")
+    print(f"Error: The dataset file was not found. Please ensure '{raw_data_path.name}' is in the '{raw_data_path.parent}' directory.")
 except Exception as e:
     print(f"An error occurred during preprocessing: {e}")
