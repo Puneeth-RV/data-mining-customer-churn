@@ -80,16 +80,16 @@ if df_raw is None:
     st.stop()
 
 st.header("1. Raw Data Overview")
-st.write("First 5 rows of the raw dataset:")
-st.dataframe(df_raw.head())
+st.write("Full raw dataset:")
+st.dataframe(df_raw)
 st.write(f"Raw Data Shape: {df_raw.shape[0]} rows, {df_raw.shape[1]} columns")
 
 # Preprocess Data
 df_processed = preprocess_data(df_raw.copy())
 
 st.header("2. Preprocessed Data Overview")
-st.write("First 5 rows of the preprocessed dataset:")
-st.dataframe(df_processed.head())
+st.write("Full preprocessed dataset:")
+st.dataframe(df_processed)
 st.write(f"Processed Data Shape: {df_processed.shape[0]} rows, {df_processed.shape[1]} columns")
 
 st.markdown("---")
