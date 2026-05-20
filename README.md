@@ -18,24 +18,41 @@ This repository contains a Data Mining mini-project focused on predicting custom
 
 ## Project Flow
 
-The project follows a standard data mining pipeline:
+The project follows a standard data mining pipeline, visualized below:
 
 ```
-+-------------------+     +---------------------+     +------------------+     +------------------------+
-|  Raw Data         |     |  Data Exploration   |     |  Data Preprocessing|     |  Model Training & Eval |
-|  (WA_Fn-UseC...)  |---->|  (data_exploration.py)|---->|  (data_preprocessing.py)|---->|  (model_training.py)   |
-+-------------------+     +---------------------+     +------------------+     +------------------------+
-                                   |                                |                        |
-                                   | (Insights)                     | (Cleaned Data)         | (Trained Model, Metrics)
-                                   v                                v                        v
-                  +---------------------------------------------------------------------------------------------------+
-                  |                       Interactive Streamlit Dashboard (app.py)                                    |
-                  |                                                                                                   |
-                  |  - Raw & Processed Data Overview                                                                  |
-                  |  - Churn Distribution                                                                             |
-                  |  - Interactive Feature Distributions                                                              |
-                  |  - Model Performance Metrics (Accuracy, Precision, Recall, F1, Confusion Matrix)                  |
-                  +---------------------------------------------------------------------------------------------------+
++---------------------+
+| 1. Raw Data         |
+| (WA_Fn-UseC...)     |
++---------+-----------+
+          |
+          v
++---------------------+
+| 2. Data Exploration |
+| (src/data_exploration.py)|
++---------+-----------+
+          | (Insights)
+          v
++---------------------+
+| 3. Data Preprocessing|
+| (src/data_preprocessing.py)|
++---------+-----------+
+          | (Cleaned Data)
+          v
++---------------------+
+| 4. Model Training   |
+|    & Evaluation     |
+| (src/model_training.py)|
++---------+-----------+
+          | (Trained Model & Metrics)
+          v
++---------------------+
+| 5. Streamlit Dashboard|
+|    (src/app.py)     |
++---------------------+
+  - Data Overviews
+  - Distributions
+  - Model Metrics & CM
 ```
 
 ## Setup and Running
