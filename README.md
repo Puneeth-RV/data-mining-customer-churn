@@ -1,84 +1,211 @@
-# Data Mining Mini-Project: Customer Churn Prediction
+# Customer Churn Prediction using Classification
 
-This repository contains a Data Mining mini-project focused on predicting customer churn in a telecommunications company. Implemented in Python, it uses a Classification approach and features an interactive Streamlit application to visualize data and model results.
+Data Mining mini project for predicting telecom customer churn using a Logistic Regression classification model.
 
-## Project Structure
+## Project Links
 
-*   **`data/`**: Stores datasets.
-    *   `raw/`: Original dataset (`WA_Fn-UseC_-Telco-Customer-Churn.csv`).
-    *   `processed/`: Cleaned and preprocessed dataset (`telco_churn_preprocessed.csv`).
-*   **`src/`**: Python scripts for the project pipeline and Streamlit app.
-    *   `data_exploration.py`: Initial data loading and exploratory analysis.
-    *   `data_preprocessing.py`: Data cleaning, encoding, and scaling.
-    *   `model_training.py`: Data splitting, model training (Logistic Regression), and evaluation.
-    *   `app.py`: Interactive Streamlit dashboard.
-*   **`reports/`**: Project documentation.
-    *   `project_report.md`: Detailed written report.
-    *   `presentation_outline.md`: PowerPoint presentation summary.
+* **Live Streamlit App:** https://auramining.streamlit.app
+* **Dataset:** IBM Telco Customer Churn dataset, publicly available on Kaggle
+* **Dataset Link:** https://www.kaggle.com/datasets/blastchar/telco-customer-churn
+* **Dataset File Used:** `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
-## Project Flow
+## Problem Statement
 
-The project follows a standard data mining pipeline, visualized below using a Mermaid diagram:
+Customer churn means customers stop using a company's service. In the telecom industry, churn directly affects revenue and business growth. The objective of this project is to predict whether a customer is likely to churn based on customer demographics, account details, service usage, contract type, payment method, monthly charges, and tenure.
+
+This is a real-world **classification** problem because the target variable has two classes: `Churn = Yes` and `Churn = No`.
+
+## Dataset Overview
+
+* **Dataset Name:** Telco Customer Churn Dataset
+* **Source:** IBM/Kaggle public dataset
+* **Number of Records:** 7043 customers
+* **Raw Columns:** 21
+* **Target Variable:** `Churn`
+
+Important attributes include:
+
+* `gender`, `SeniorCitizen`, `Partner`, `Dependents`
+* `tenure`, `Contract`, `PaymentMethod`
+* `PhoneService`, `InternetService`, `OnlineSecurity`, `TechSupport`
+* `MonthlyCharges`, `TotalCharges`
+
+## Methodology
+
+The project follows a standard data mining workflow:
 
 ```mermaid
 graph TD
-    A[Raw Data<br>(WA_Fn-UseC...)] --> B{Data Exploration<br>(src/data_exploration.py)}
-    B --> C{Data Preprocessing<br>(src/data_preprocessing.py)}
-    C --> D{Model Training & Eval<br>(src/model_training.py)}
-    D --> E(Interactive Streamlit Dashboard<br>(src/app.py))
-    subgraph Streamlit Features
-        E --> F[Data Overviews]
-        E --> G[Distributions]
-        E --> H[Model Metrics & CM]
-    end
+    A[Raw Telco Dataset] --> B[Data Exploration]
+    B --> C[Data Preprocessing]
+    C --> D[Train-Test Split]
+    D --> E[Logistic Regression Model]
+    E --> F[Model Evaluation]
+    F --> G[Streamlit Dashboard and Result Charts]
 ```
 
-## Setup and Running
+## Data Preprocessing
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Puneeth-RV/data-mining-customer-churn.git
-    cd data-mining-customer-churn
-    ```
-2.  **Install Dependencies:**
-    ```bash
-    python3 -m pip install -r requirements.txt
-    ```
-3.  **Run the Pipeline (Optional):**
-    For batch processing and to ensure `telco_churn_preprocessed.csv` is generated:
-    ```bash
-    python3 src/data_exploration.py
-    python3 src/data_preprocessing.py
-    python3 src/model_training.py
-    ```
-4.  **Run the Streamlit Application:**
-    To launch the interactive dashboard in your web browser:
-    ```bash
-    python3 -m streamlit run src/app.py
-    ```
+The following preprocessing steps were performed:
 
-## Running in VS Code
+* Converted `TotalCharges` from text/object format to numeric.
+* Handled missing `TotalCharges` values using median imputation.
+* Removed `customerID` because it is only an identifier.
+* Encoded categorical variables using One-Hot Encoding.
+* Scaled continuous numerical features:
+    * `tenure`
+    * `MonthlyCharges`
+    * `TotalCharges`
+* Used a leakage-safe pipeline where imputation, encoding, and scaling are fitted only on the training data.
 
-Open the project folder in VS Code and use one of these options:
+## Technique Used
 
-* Run `src/run_in_vscode.py` to execute the complete analysis in the terminal and save result graphs to `reports/figures/`.
-* Use the VS Code Run and Debug panel:
-    * `Run Assignment Analysis`
-    * `Run Streamlit Dashboard`
+* **Data Mining Technique:** Classification
+* **Algorithm:** Logistic Regression
+* **Reason:** Logistic Regression is suitable for binary classification problems and provides interpretable coefficients for understanding churn-related factors.
 
-## Online Deployment
+## Implementation Details
 
-This app is ready to deploy on Streamlit Community Cloud.
+Tools and libraries used:
 
-1. Push this repository to GitHub.
-2. Go to `https://share.streamlit.io/`.
-3. Create a new app from `Puneeth-RV/data-mining-customer-churn`.
-4. Set the main file path to:
-   ```text
-   src/app.py
-   ```
-5. Deploy.
+* Python
+* pandas
+* scikit-learn
+* matplotlib
+* seaborn
+* Streamlit
+* VS Code
 
-## Project Overview
+Training parameters:
 
-This project successfully implements a Logistic Regression model for customer churn prediction. Detailed methodology, results, and future scope are in `reports/project_report.md`. The Streamlit dashboard offers a visual, interactive exploration of data and model performance.
+```text
+test_size = 0.2
+random_state = 42
+stratify = y
+solver = lbfgs
+max_iter = 1000
+```
+
+## Results
+
+Model performance on the test set:
+
+| Metric | Value |
+|---|---:|
+| Accuracy | 0.8055 |
+| Precision | 0.6572 |
+| Recall | 0.5588 |
+| F1-Score | 0.6040 |
+
+Confusion matrix:
+
+```text
+[[926 109]
+ [165 209]]
+```
+
+## Result Graphs and Screenshots
+
+### Churn Distribution
+
+Shows the number of customers who churned and did not churn.
+
+![Churn Distribution](reports/figures/churn_distribution.png)
+
+### Churn Rate by Contract Type
+
+Shows that month-to-month contract customers have the highest churn rate.
+
+![Churn Rate by Contract](reports/figures/churn_rate_by_contract.png)
+
+### Monthly Charges by Churn
+
+Compares monthly charges for churned and non-churned customers.
+
+![Monthly Charges by Churn](reports/figures/monthly_charges_by_churn.png)
+
+### Confusion Matrix
+
+Shows correct and incorrect model predictions.
+
+![Confusion Matrix](reports/figures/confusion_matrix.png)
+
+### Top Model Coefficients
+
+Shows the most influential Logistic Regression features.
+
+![Top Model Coefficients](reports/figures/top_model_coefficients.png)
+
+## How to Run in VS Code
+
+Open the `data_mining_project` folder in VS Code.
+
+Run the complete analysis:
+
+```bash
+python3 src/run_in_vscode.py
+```
+
+If you are in the outer `DM assignment` folder, run:
+
+```bash
+python3 data_mining_project/src/run_in_vscode.py
+```
+
+This prints the model results in the terminal and saves graph images to:
+
+```text
+reports/figures/
+```
+
+You can also use the VS Code **Run and Debug** panel:
+
+* `Run Assignment Analysis`
+* `Run Streamlit Dashboard`
+
+## How to Run Streamlit Locally
+
+Install dependencies:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Run the dashboard:
+
+```bash
+python3 -m streamlit run src/app.py
+```
+
+## Project Structure
+
+```text
+data_mining_project/
+├── data/
+│   ├── raw/
+│   └── processed/
+├── reports/
+│   ├── figures/
+│   ├── project_report.md
+│   └── presentation_outline.md
+├── src/
+│   ├── app.py
+│   ├── data_exploration.py
+│   ├── data_preprocessing.py
+│   ├── model_training.py
+│   └── run_in_vscode.py
+├── requirements.txt
+└── README.md
+```
+
+## Conclusion
+
+The project successfully applies a classification model to predict telecom customer churn. The Logistic Regression model achieved **80.55% accuracy**. The analysis shows that contract type, tenure, internet service type, payment method, and monthly charges are important factors related to churn.
+
+## Future Scope
+
+* Try advanced models such as Random Forest, XGBoost, or Gradient Boosting.
+* Improve recall for churn customers.
+* Handle class imbalance using SMOTE.
+* Perform hyperparameter tuning.
+* Extend the dashboard with customer-level prediction input.

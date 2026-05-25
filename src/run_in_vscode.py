@@ -1,5 +1,13 @@
+#!/usr/bin/env python3
+
+# From the outer assignment folder, run:
+# python3 data_mining_project/src/run_in_vscode.py
+import os
+import tempfile
 import warnings
 from pathlib import Path
+
+os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "dm_assignment_matplotlib"))
 
 import matplotlib
 
