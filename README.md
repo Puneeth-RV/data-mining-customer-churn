@@ -38,11 +38,11 @@ graph TD
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/Puneeth-RV/data-mining-customer-churn.git
-    cd data-mining-customer-churn/data_mining_project
+    cd data-mining-customer-churn
     ```
 2.  **Install Dependencies:**
     ```bash
-    python3 -m pip install pandas scikit-learn numpy streamlit matplotlib seaborn
+    python3 -m pip install -r requirements.txt
     ```
 3.  **Run the Pipeline (Optional):**
     For batch processing and to ensure `telco_churn_preprocessed.csv` is generated:
@@ -56,6 +56,19 @@ graph TD
     ```bash
     python3 -m streamlit run src/app.py
     ```
+
+## Online Deployment
+
+This app is ready to deploy on Streamlit Community Cloud.
+
+1. Push this repository to GitHub.
+2. Go to `https://share.streamlit.io/`.
+3. Create a new app from `Puneeth-RV/data-mining-customer-churn`.
+4. Set the main file path to:
+   ```text
+   src/app.py
+   ```
+5. Deploy.
 
 ## Project Overview
 
