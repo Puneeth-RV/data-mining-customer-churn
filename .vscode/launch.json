@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Assignment Analysis",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/run_in_vscode.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run Streamlit Dashboard",
+      "type": "python",
+      "request": "launch",
+      "module": "streamlit",
+      "args": [
+        "run",
+        "${workspaceFolder}/src/app.py"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}

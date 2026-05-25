@@ -57,6 +57,15 @@ graph TD
     python3 -m streamlit run src/app.py
     ```
 
+## Running in VS Code
+
+Open the project folder in VS Code and use one of these options:
+
+* Run `src/run_in_vscode.py` to execute the complete analysis in the terminal and save result graphs to `reports/figures/`.
+* Use the VS Code Run and Debug panel:
+    * `Run Assignment Analysis`
+    * `Run Streamlit Dashboard`
+
 ## Online Deployment
 
 This app is ready to deploy on Streamlit Community Cloud.
