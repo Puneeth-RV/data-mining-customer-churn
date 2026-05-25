@@ -1,13 +1,18 @@
+import warnings
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
-from pathlib import Path # Import Pathlib
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from pathlib import Path
 
 st.set_page_config(layout="wide")
 
@@ -35,7 +40,7 @@ def preprocess_data(df):
     # Handle 'TotalCharges' column
     df_processed['TotalCharges'] = pd.to_numeric(df_processed['TotalCharges'], errors='coerce')
     median_total_charges = df_processed['TotalCharges'].median()
-    df_processed['TotalCharges'].fillna(median_total_charges, inplace=True)
+    df_processed['TotalCharges'] = df_processed['TotalCharges'].fillna(median_total_charges)
 
     # Drop 'customerID' column
     df_processed.drop('customerID', axis=1, inplace=True)
@@ -63,11 +68,31 @@ def preprocess_data(df):
     
     return df_processed
 
-@st.cache_resource # Use st.cache_resource for models
+@st.cache_resource
 def train_model(X_train, y_train):
-    """Trains the Logistic Regression model."""
-    model = LogisticRegression(random_state=42, solver='liblinear')
-    model.fit(X_train, y_train)
+    """Trains a leakage-safe Logistic Regression pipeline."""
+    continuous_cols = ['tenure', 'MonthlyCharges', 'TotalCharges']
+    passthrough_cols = ['SeniorCitizen']
+    categorical_cols = X_train.select_dtypes(include='object').columns.tolist()
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('continuous', Pipeline([
+                ('imputer', SimpleImputer(strategy='median')),
+                ('scaler', StandardScaler())
+            ]), continuous_cols),
+            ('categorical', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), categorical_cols),
+            ('binary_numeric', 'passthrough', passthrough_cols)
+        ]
+    )
+
+    model = Pipeline([
+        ('preprocessor', preprocessor),
+        ('classifier', LogisticRegression(random_state=42, solver='lbfgs', max_iter=1000))
+    ])
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning, module=r"sklearn\..*")
+        model.fit(X_train, y_train)
     return model
 
 # --- Streamlit App Layout ---
@@ -131,22 +156,20 @@ st.markdown("---")
 # --- Model Training and Evaluation ---
 st.header("5. Model Training and Evaluation")
 
-# Separate features (X) and target (y) from preprocessed data
-X = df_processed.drop('Churn', axis=1)
-y = df_processed['Churn']
+# Separate raw features and target. Preprocessing is fit after the split to avoid leakage.
+df_model = df_raw.copy()
+df_model['TotalCharges'] = pd.to_numeric(df_model['TotalCharges'], errors='coerce')
+X = df_model.drop(['customerID', 'Churn'], axis=1)
+y = df_model['Churn'].map({'No': 0, 'Yes': 1})
 
 # Data Splitting
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-# Feature Scaling
-numerical_cols = X_train.select_dtypes(include=np.number).columns.tolist()
-scaler = StandardScaler()
-X_train[numerical_cols] = scaler.fit_transform(X_train[numerical_cols])
-X_test[numerical_cols] = scaler.transform(X_test[numerical_cols])
-
 # Train Model
 model = train_model(X_train, y_train)
-y_pred = model.predict(X_test)
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning, module=r"sklearn\..*")
+    y_pred = model.predict(X_test)
 
 # Model Performance Metrics
 st.subheader("Model Performance Metrics (Logistic Regression)")

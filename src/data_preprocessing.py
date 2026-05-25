@@ -28,7 +28,7 @@ try:
     # This assumes a small number of missing values.
     # If there are many, a more sophisticated imputation might be needed.
     median_total_charges = df['TotalCharges'].median()
-    df['TotalCharges'].fillna(median_total_charges, inplace=True)
+    df['TotalCharges'] = df['TotalCharges'].fillna(median_total_charges)
     print(f"Filled missing TotalCharges with median: {median_total_charges}")
 
 

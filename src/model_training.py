@@ -1,46 +1,66 @@
+import warnings
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
-import numpy as np
-from pathlib import Path # Import Pathlib
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from pathlib import Path
 
-# Load the preprocessed dataset
+# Load the raw dataset and fit preprocessing on the training split only.
 try:
-    # Construct an absolute path relative to the current script's directory
     current_dir = Path(__file__).parent
-    processed_data_path = current_dir.parent / 'data' / 'processed' / 'telco_churn_preprocessed.csv'
+    raw_data_path = current_dir.parent / 'data' / 'raw' / 'WA_Fn-UseC_-Telco-Customer-Churn.csv'
 
-    df = pd.read_csv(processed_data_path)
-    print("Preprocessed dataset loaded successfully.")
+    df = pd.read_csv(raw_data_path)
+    print("Raw dataset loaded successfully.")
+    df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 
     # Separate features (X) and target (y)
-    X = df.drop('Churn', axis=1)
-    y = df['Churn']
+    X = df.drop(['customerID', 'Churn'], axis=1)
+    y = df['Churn'].map({'No': 0, 'Yes': 1})
 
     # 1. Data Splitting
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     print("Data split into training and testing sets.")
     print(f"X_train shape: {X_train.shape}, X_test shape: {X_test.shape}")
 
-    # 2. Feature Scaling
-    # Apply StandardScaler to numerical features
-    # Identify numerical columns (excluding boolean and already-encoded categorical)
-    numerical_cols = X_train.select_dtypes(include=np.number).columns.tolist()
-    
-    scaler = StandardScaler()
-    X_train[numerical_cols] = scaler.fit_transform(X_train[numerical_cols])
-    X_test[numerical_cols] = scaler.transform(X_test[numerical_cols])
-    print("Numerical features scaled using StandardScaler.")
+    # 2. Preprocessing
+    # Median imputation and scaling are fit on X_train only to avoid data leakage.
+    continuous_cols = ['tenure', 'MonthlyCharges', 'TotalCharges']
+    passthrough_cols = ['SeniorCitizen']
+    categorical_cols = X_train.select_dtypes(include='object').columns.tolist()
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('continuous', Pipeline([
+                ('imputer', SimpleImputer(strategy='median')),
+                ('scaler', StandardScaler())
+            ]), continuous_cols),
+            ('categorical', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), categorical_cols),
+            ('binary_numeric', 'passthrough', passthrough_cols)
+        ]
+    )
+    print("Preprocessing configured: train-only median imputation, one-hot encoding, and scaling for continuous numeric features.")
 
     # 3. Algorithm Selection & Implementation (Logistic Regression as a baseline)
-    model = LogisticRegression(random_state=42, solver='liblinear') # 'liblinear' is good for small datasets and binary classification
-    model.fit(X_train, y_train)
+    model = Pipeline([
+        ('preprocessor', preprocessor),
+        ('classifier', LogisticRegression(random_state=42, solver='lbfgs', max_iter=1000))
+    ])
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning, module=r"sklearn\..*")
+        model.fit(X_train, y_train)
     print("Logistic Regression model trained.")
+    print("Training parameters: test_size=0.2, random_state=42, stratify=y, solver='lbfgs', max_iter=1000")
 
     # 4. Model Evaluation
-    y_pred = model.predict(X_test)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning, module=r"sklearn\..*")
+        y_pred = model.predict(X_test)
 
     print("--- Model Evaluation Results (Logistic Regression) ---")
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
@@ -53,6 +73,6 @@ try:
     print(classification_report(y_test, y_pred))
 
 except FileNotFoundError:
-    print(f"Error: The preprocessed dataset file was not found. Please ensure '{processed_data_path.name}' is in the '{processed_data_path.parent}' directory.")
+    print(f"Error: The dataset file was not found. Please ensure '{raw_data_path.name}' is in the '{raw_data_path.parent}' directory.")
 except Exception as e:
     print(f"An error occurred during model training and evaluation: {e}")
