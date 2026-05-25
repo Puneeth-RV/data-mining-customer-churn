@@ -27,8 +27,27 @@ def show_centered_plot(fig, width="medium"):
     }
     left, center, right = st.columns(widths[width])
     with center:
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width="stretch")
     plt.close(fig)
+
+def get_feature_importance(model):
+    """Return the strongest Logistic Regression coefficients by absolute value."""
+    preprocessor = model.named_steps['preprocessor']
+    classifier = model.named_steps['classifier']
+    feature_names = preprocessor.get_feature_names_out()
+    coefficients = classifier.coef_[0]
+
+    importance = pd.DataFrame({
+        'Feature': feature_names,
+        'Coefficient': coefficients,
+        'Absolute Coefficient': np.abs(coefficients),
+    })
+    importance['Feature'] = (
+        importance['Feature']
+        .str.replace(r'^(continuous|categorical|binary_numeric)__', '', regex=True)
+        .str.replace('_', ' ', regex=False)
+    )
+    return importance.sort_values('Absolute Coefficient', ascending=False)
 
 @st.cache_data
 def load_raw_data():
@@ -135,7 +154,7 @@ st.markdown("---")
 st.header("3. Churn Distribution")
 churn_counts = df_raw['Churn'].value_counts()
 fig_churn, ax_churn = plt.subplots(figsize=(5.5, 3.5))
-sns.barplot(x=churn_counts.index, y=churn_counts.values, ax=ax_churn, palette='viridis')
+sns.barplot(x=churn_counts.index, y=churn_counts.values, ax=ax_churn, color='#2a9d8f')
 ax_churn.set_title('Distribution of Customer Churn')
 ax_churn.set_xlabel('Churn')
 ax_churn.set_ylabel('Number of Customers')
@@ -159,12 +178,37 @@ if selected_feature:
     if df_raw[selected_feature].dtype == 'object': # Categorical
         sns.countplot(data=df_raw, x=selected_feature, hue='Churn', ax=ax_feature, palette='coolwarm')
         ax_feature.set_title(f'Distribution of {selected_feature} by Churn')
-        ax_feature.set_xticklabels(ax_feature.get_xticklabels(), rotation=45, ha='right')
+        ax_feature.tick_params(axis='x', rotation=45)
     else: # Numerical (SeniorCitizen is int, but effectively categorical)
         sns.histplot(data=df_raw, x=selected_feature, hue='Churn', kde=True, ax=ax_feature, palette='coolwarm')
         ax_feature.set_title(f'Distribution of {selected_feature} by Churn')
     fig_feature.tight_layout()
     show_centered_plot(fig_feature, width="medium")
+
+st.subheader("Churn Rate by Contract Type")
+contract_churn = (
+    df_raw.assign(ChurnFlag=df_raw['Churn'].map({'No': 0, 'Yes': 1}))
+    .groupby('Contract', as_index=False)['ChurnFlag']
+    .mean()
+)
+contract_churn['Churn Rate (%)'] = contract_churn['ChurnFlag'] * 100
+fig_contract, ax_contract = plt.subplots(figsize=(6.2, 3.8))
+sns.barplot(data=contract_churn, x='Contract', y='Churn Rate (%)', ax=ax_contract, color='#457b9d')
+ax_contract.set_title('Churn Rate by Contract Type')
+ax_contract.set_xlabel('Contract Type')
+ax_contract.set_ylabel('Churn Rate (%)')
+ax_contract.set_ylim(0, max(contract_churn['Churn Rate (%)']) + 10)
+fig_contract.tight_layout()
+show_centered_plot(fig_contract, width="medium")
+
+st.subheader("Monthly Charges by Churn")
+fig_monthly, ax_monthly = plt.subplots(figsize=(6.2, 3.8))
+sns.boxplot(data=df_raw, x='Churn', y='MonthlyCharges', hue='Churn', ax=ax_monthly, palette='Set2', legend=False)
+ax_monthly.set_title('Monthly Charges Distribution by Churn')
+ax_monthly.set_xlabel('Churn')
+ax_monthly.set_ylabel('Monthly Charges')
+fig_monthly.tight_layout()
+show_centered_plot(fig_monthly, width="medium")
 
 st.markdown("---")
 
@@ -211,6 +255,18 @@ ax_cm.set_xlabel('Predicted Label')
 ax_cm.set_title('Confusion Matrix')
 fig_cm.tight_layout()
 show_centered_plot(fig_cm, width="small")
+
+st.subheader("Top Model Coefficients")
+top_importance = get_feature_importance(model).head(10).sort_values('Coefficient')
+fig_coef, ax_coef = plt.subplots(figsize=(7, 4.8))
+colors = np.where(top_importance['Coefficient'] >= 0, '#d95f02', '#1b9e77')
+ax_coef.barh(top_importance['Feature'], top_importance['Coefficient'], color=colors)
+ax_coef.axvline(0, color='black', linewidth=0.8)
+ax_coef.set_title('Top Logistic Regression Coefficients')
+ax_coef.set_xlabel('Coefficient Value')
+ax_coef.set_ylabel('')
+fig_coef.tight_layout()
+show_centered_plot(fig_coef, width="medium")
 
 st.markdown("---")
 
