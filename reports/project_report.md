@@ -168,19 +168,7 @@ Figure 5 shows the top coefficients learned by the Logistic Regression model. Po
 
 ---
 
-## 9. Roles and Responsibilities of the Team members
-This was an individual mini-project. **Puneeth R V (Register No. 23ETCS002094)** took full responsibility for all stages of the project, including:
-- **Problem Definition:** Formulating the business objective and identifying customer churn as a classification task.
-- **Data Exploration:** Loading the IBM dataset, conducting exploratory data analysis, and creating initial distributions.
-- **Data Preprocessing:** Converting `TotalCharges`, imputing missing data with medians, performing label encoding, one-hot encoding, and scaling variables inside a scikit-learn Pipeline.
-- **Model Development:** Selecting Logistic Regression, configuring training parameters, splitting the dataset, and fitting the classifier.
-- **Evaluation:** Computing accuracy, precision, recall, and F1-score, plotting confusion matrices, and analyzing the learned model coefficients.
-- **Dashboard & Deployment:** Developing the interactive Streamlit dashboard and publishing the codebase to GitHub.
-- **Documentation:** Drafting the final assignment report and organizing the presentation materials.
-
----
-
-## 10. References
+## 9. References
 1. IBM Telco Customer Churn Dataset on Kaggle: `https://www.kaggle.com/datasets/blastchar/telco-customer-churn`
 2. Scikit-learn: Machine Learning in Python, Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.
 3. Pandas: powerful Python data analysis toolkit, Wes McKinney, 2010.
